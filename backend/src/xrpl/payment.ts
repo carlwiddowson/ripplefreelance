@@ -1,4 +1,4 @@
-import { Payment, xrpToDrops, dropsToXrp } from 'xrpl';
+import { Payment, xrpToDrops, dropsToXrp as _dropsToXrp } from 'xrpl';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
 

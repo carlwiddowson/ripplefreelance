@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/auth';
-import { UserModel } from '../models/User';
 
 // Extend Express Request type to include user
 declare global {
@@ -80,7 +79,7 @@ export function requireRole(...roles: string[]) {
  */
 export async function optionalAuthenticate(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> {
   try {

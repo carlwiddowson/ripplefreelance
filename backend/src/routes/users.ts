@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { UserModel } from '../models/User';
-import { authenticate, requireRole } from '../middleware/auth';
+import { authenticate, requireRole as _requireRole } from '../middleware/auth';
 import { validateBody, validateParams, validateQuery, schemas } from '../middleware/validate';
 
 const router = Router();

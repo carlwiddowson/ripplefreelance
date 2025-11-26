@@ -1,11 +1,12 @@
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 import { createHash } from 'crypto';
-import { verifySignature, Wallet } from 'xrpl';
+// import { verifySignature, Wallet } from 'xrpl'; // Not used yet
 import { UserModel } from '../models/User';
 import { query } from '../db';
 import { logger } from '../utils/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET: Secret = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface AuthTokenPayload {
@@ -32,9 +33,10 @@ export class AuthService {
    * Generate JWT token
    */
   static generateToken(payload: AuthTokenPayload): string {
-    return jwt.sign(payload, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const options: SignOptions = {
+      expiresIn: JWT_EXPIRES_IN as StringValue | number,
+    };
+    return jwt.sign(payload, JWT_SECRET, options);
   }
 
   /**
@@ -100,7 +102,7 @@ export class AuthService {
    */
   static verifyWalletSignature(
     walletAddress: string,
-    message: string,
+    _message: string,
     signature: string
   ): boolean {
     try {
@@ -134,7 +136,7 @@ export class AuthService {
   /**
    * Authenticate or register user with wallet
    */
-  static async authenticateWithWallet(data: {
+static async authenticateWithWallet(data: {
     wallet_address: string;
     signature: string;
     message: string;

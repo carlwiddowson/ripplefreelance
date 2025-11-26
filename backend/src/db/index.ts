@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { logger } from '../utils/logger';
 
 // Database connection pool
@@ -41,7 +41,7 @@ export function getPool(): Pool {
 /**
  * Execute a query
  */
-export async function query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+export async function query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
   const start = Date.now();
   try {
     const result = await getPool().query<T>(text, params);

@@ -110,8 +110,8 @@ class XRPLClient {
       accounts: [address],
     });
 
-    client.on('transaction', (tx) => {
-      if (tx.transaction.Account === address || tx.transaction.Destination === address) {
+    client.on('transaction', (tx: any) => {
+      if (tx.transaction && (tx.transaction.Account === address || tx.transaction.Destination === address)) {
         callback(tx);
       }
     });
