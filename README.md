@@ -2,6 +2,11 @@
 
 A cross-border gig economy platform powered by XRP Ledger (XRPL) DeFi.
 
+## 🌐 Live Demo
+
+- **Frontend**: [https://ripplefreelance.vercel.app](https://ripplefreelance.vercel.app)
+- **Backend API**: [https://backend-livid-zeta-66.vercel.app](https://backend-livid-zeta-66.vercel.app)
+
 ## 🚀 Vision
 
 RippleFreelance revolutionizes the global freelance marketplace by leveraging XRPL's lightning-fast settlements and low fees to eliminate cross-border payment friction. Built for freelancers and small businesses in emerging markets, it integrates XRP, RLUSD stablecoin, and native XRPL escrow features.
@@ -28,10 +33,13 @@ RippleFreelance revolutionizes the global freelance marketplace by leveraging XR
 - Supabase for file storage
 
 ### Frontend
-- React Native (Expo)
-- Next.js (Web version)
-- TanStack Query
-- NativeBase/Tamagui UI
+- Next.js 16 with App Router
+- TypeScript
+- Tailwind CSS
+- TanStack Query (React Query)
+- Zustand (state management)
+- Lucide React (icons)
+- React Native (Expo) - Coming soon
 
 ## 📋 Project Structure
 
@@ -44,13 +52,11 @@ ripplefreelance/
 │   │   ├── models/  # Database models
 │   │   └── utils/   # Helper functions
 │   └── package.json
-├── mobile/          # React Native app
-│   ├── src/
-│   │   ├── screens/ # App screens
-│   │   ├── components/
-│   │   └── hooks/   # Custom hooks (XRPL, auth)
+├── web/              # Next.js web app ✅ DEPLOYED
+│   ├── app/         # Next.js app directory
+│   ├── components/  # React components
+│   ├── lib/         # API client, state management
 │   └── package.json
-├── web/             # Next.js web app (future)
 └── docs/            # Documentation
 ```
 
@@ -73,13 +79,28 @@ npm run migrate
 npm run dev
 ```
 
-### Mobile Setup
+### Web Frontend Setup
 
 ```bash
-cd mobile
+cd web
 npm install
-cp .env.example .env
-npx expo start
+cp .env.local.example .env.local
+# Edit .env.local with backend API URL
+npm run dev
+```
+
+### Production Deployment
+
+Both backend and frontend are deployed on Vercel:
+
+```bash
+# Backend
+cd backend
+vercel --prod
+
+# Frontend
+cd web
+vercel --prod
 ```
 
 ## 🔑 Environment Variables
@@ -94,10 +115,10 @@ JWT_SECRET=your_jwt_secret
 ENCRYPTION_KEY=your_encryption_key_for_escrow_fulfillments
 ```
 
-### Mobile (.env)
+### Web Frontend (.env.local)
 ```
-API_BASE_URL=http://localhost:3000
-XAMAN_API_KEY=your_xaman_api_key
+NEXT_PUBLIC_API_URL=https://backend-livid-zeta-66.vercel.app/api/v1
+NEXT_PUBLIC_XRPL_NETWORK=wss://s.altnet.rippletest.net:51233
 ```
 
 ## 🧪 Testing
@@ -116,21 +137,30 @@ npm run test:integration # Integration tests on XRPL Testnet
 
 ## 📖 API Documentation
 
-### Authentication
-- `POST /auth/connect-wallet` - Connect Xaman wallet
-- `GET /auth/me` - Get current user
+Base URL: `https://backend-livid-zeta-66.vercel.app/api/v1`
 
-### Gigs
+### Authentication
+- `GET /auth/challenge` - Get challenge message for wallet signing
+- `POST /auth/connect-wallet` - Authenticate with wallet signature
+- `GET /auth/me` - Get current user profile
+- `POST /auth/logout` - Logout and delete session
+- `POST /auth/refresh` - Refresh JWT token
+
+### Users
+- `GET /users` - List users with filters
+- `GET /users/:wallet_address` - Get public user profile
+- `PUT /users/profile` - Update own profile (authenticated)
+- `DELETE /users/account` - Delete own account (authenticated)
+
+### Gigs (Coming Soon)
 - `GET /gigs` - List all gigs
-- `POST /gigs` - Create new gig (freelancers)
+- `POST /gigs` - Create new gig
 - `GET /gigs/:id` - Get gig details
 
-### Payments
+### Payments (Coming Soon)
 - `POST /payments/create` - Initiate XRP/RLUSD payment
 - `POST /escrows/create` - Create milestone escrow
 - `POST /escrows/:id/release` - Release escrow after approval
-
-See [API.md](./docs/API.md) for full documentation.
 
 ## 🏆 Roadmap
 
@@ -142,9 +172,17 @@ See [API.md](./docs/API.md) for full documentation.
   - [x] Wallet signature verification
   - [x] User CRUD with role-based access
   - [x] 9 API endpoints functional
+- [x] **Web Frontend Deployed!** 🚀
+  - [x] Next.js 16 app with Tailwind CSS
+  - [x] Landing page with hero & features
+  - [x] Wallet connection/authentication
+  - [x] Dashboard with user stats
+  - [x] Freelancers listing page
+  - [x] Full API integration
+  - [x] Production deployment on Vercel
 - [ ] Week 2: Gig marketplace CRUD
 - [ ] Week 3-4: XRP payments & escrow integration
-- [ ] Week 5-6: Testing & Mobile app UI
+- [ ] Week 5-6: Testing & enhancements
 
 ### Phase 2: RLUSD + AMM (Weeks 7-8)
 - [ ] RLUSD trustline integration

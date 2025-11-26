@@ -48,3 +48,4 @@ mobile/.expo-shared/
 # Database
 *.sqlite
 *.db
+.vercel
