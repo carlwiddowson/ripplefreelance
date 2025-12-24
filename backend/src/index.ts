@@ -7,6 +7,7 @@ import { initializeDatabase } from './db';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
+import gigsRoutes from './routes/gigs';
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +43,7 @@ app.get('/api/v1', (_req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/gigs', gigsRoutes);
 
 // Error handling middleware
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

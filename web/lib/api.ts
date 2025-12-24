@@ -79,3 +79,49 @@ export const usersApi = {
   
   deleteAccount: () => api.delete('/users/account'),
 };
+
+// Gigs API
+export const gigsApi = {
+  createGig: (data: {
+    title: string;
+    description: string;
+    category: string;
+    skills?: string[];
+    price_usd: number;
+    estimated_delivery_days: number;
+    milestones?: {
+      title: string;
+      description?: string;
+      percentage: number;
+    }[];
+  }) => api.post('/gigs', data),
+  
+  listGigs: (params?: {
+    limit?: number;
+    offset?: number;
+    freelancer_id?: string;
+    category?: string;
+    status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+    min_price?: number;
+    max_price?: number;
+  }) => api.get('/gigs', { params }),
+  
+  getGig: (id: string) => api.get(`/gigs/${id}`),
+  
+  updateGig: (id: string, data: {
+    title?: string;
+    description?: string;
+    category?: string;
+    skills?: string[];
+    price_usd?: number;
+    estimated_delivery_days?: number;
+    milestones?: {
+      title: string;
+      description?: string;
+      percentage: number;
+    }[];
+    status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  }) => api.put(`/gigs/${id}`, data),
+  
+  deleteGig: (id: string) => api.delete(`/gigs/${id}`),
+};
