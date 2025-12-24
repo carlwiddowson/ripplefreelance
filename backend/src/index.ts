@@ -8,6 +8,8 @@ import { logger } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import gigsRoutes from './routes/gigs';
+import paymentsRoutes from './routes/payments';
+import escrowsRoutes from './routes/escrows';
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +46,8 @@ app.get('/api/v1', (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/gigs', gigsRoutes);
+app.use('/api/v1/payments', paymentsRoutes);
+app.use('/api/v1/escrows', escrowsRoutes);
 
 // Error handling middleware
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
