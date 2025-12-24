@@ -152,15 +152,28 @@ Base URL: `https://backend-livid-zeta-66.vercel.app/api/v1`
 - `PUT /users/profile` - Update own profile (authenticated)
 - `DELETE /users/account` - Delete own account (authenticated)
 
-### Gigs (Coming Soon)
-- `GET /gigs` - List all gigs
-- `POST /gigs` - Create new gig
+### Gigs
+- `GET /gigs` - List all gigs with filters
+- `POST /gigs` - Create new gig (freelancers only)
 - `GET /gigs/:id` - Get gig details
+- `PUT /gigs/:id` - Update gig (owner only)
+- `DELETE /gigs/:id` - Delete gig (owner only, open status)
 
-### Payments (Coming Soon)
-- `POST /payments/create` - Initiate XRP/RLUSD payment
-- `POST /escrows/create` - Create milestone escrow
-- `POST /escrows/:id/release` - Release escrow after approval
+### Payments
+- `POST /payments/initiate` - Create payment intent for a gig
+- `POST /payments/confirm` - Confirm payment transaction
+- `GET /payments/:id` - Get payment details
+- `GET /payments` - List payments (authenticated user)
+
+### Escrows
+- `POST /escrows/create` - Create milestone escrow for gig
+- `POST /escrows/confirm` - Confirm escrow creation
+- `POST /escrows/:id/release` - Prepare escrow release
+- `POST /escrows/:id/release/confirm` - Confirm escrow release
+- `POST /escrows/:id/cancel` - Prepare escrow cancellation
+- `POST /escrows/:id/cancel/confirm` - Confirm escrow cancellation
+- `GET /escrows/:id` - Get escrow details
+- `GET /escrows` - List escrows (authenticated user)
 
 ## 🏆 Roadmap
 
@@ -180,8 +193,23 @@ Base URL: `https://backend-livid-zeta-66.vercel.app/api/v1`
   - [x] Freelancers listing page
   - [x] Full API integration
   - [x] Production deployment on Vercel
-- [ ] Week 2: Gig marketplace CRUD
-- [ ] Week 3-4: XRP payments & escrow integration
+- [x] **Week 2 Complete!** Gig marketplace CRUD
+  - [x] Gig model with full CRUD operations
+  - [x] 5 gig API endpoints (create, list, get, update, delete)
+  - [x] Gig filtering by category, status, and price
+  - [x] Gigs listing page with filters and modal
+  - [x] Gig detail page with payment flow
+  - [x] Role-based access control
+- [x] **Week 3-4 Complete!** XRP payments & escrow integration
+  - [x] Encryption utility (AES-256-GCM)
+  - [x] Transaction and Escrow models with CRUD
+  - [x] Payment API (4 endpoints)
+  - [x] Escrow API (8 endpoints)
+  - [x] Xaman wallet integration
+  - [x] QR code transaction signing
+  - [x] Escrow creation and release flow
+  - [x] Encrypted fulfillment storage
+  - [x] Automatic gig status updates
 - [ ] Week 5-6: Testing & enhancements
 
 ### Phase 2: RLUSD + AMM (Weeks 7-8)
