@@ -125,3 +125,68 @@ export const gigsApi = {
   
   deleteGig: (id: string) => api.delete(`/gigs/${id}`),
 };
+
+// Payments API
+export const paymentsApi = {
+  initiatePayment: (data: {
+    gig_id: string;
+    amount_xrp: number;
+    currency?: 'XRP' | 'RLUSD';
+  }) => api.post('/payments/initiate', data),
+  
+  confirmPayment: (data: {
+    xrpl_tx_hash: string;
+    from_wallet: string;
+    to_wallet: string;
+    amount_xrp: number;
+  }) => api.post('/payments/confirm', data),
+  
+  getPayment: (id: string) => api.get(`/payments/${id}`),
+  
+  listPayments: (params?: {
+    limit?: number;
+    offset?: number;
+    tx_type?: 'payment' | 'escrow_create' | 'escrow_finish' | 'escrow_cancel';
+    status?: 'pending' | 'confirmed' | 'failed';
+  }) => api.get('/payments', { params }),
+};
+
+// Escrows API
+export const escrowsApi = {
+  createEscrow: (data: {
+    gig_id: string;
+    amount_xrp: number;
+    delivery_date: string;
+  }) => api.post('/escrows/create', data),
+  
+  confirmEscrow: (data: {
+    gig_id: string;
+    xrpl_tx_hash: string;
+    xrpl_sequence_number: number;
+    condition: string;
+    fulfillment: string;
+    finish_after?: string;
+    cancel_after: string;
+    amount_xrp: number;
+  }) => api.post('/escrows/confirm', data),
+  
+  releaseEscrow: (id: string) => api.post(`/escrows/${id}/release`),
+  
+  confirmRelease: (id: string, data: {
+    xrpl_tx_hash: string;
+  }) => api.post(`/escrows/${id}/release/confirm`, data),
+  
+  cancelEscrow: (id: string) => api.post(`/escrows/${id}/cancel`),
+  
+  confirmCancel: (id: string, data: {
+    xrpl_tx_hash: string;
+  }) => api.post(`/escrows/${id}/cancel/confirm`, data),
+  
+  getEscrow: (id: string) => api.get(`/escrows/${id}`),
+  
+  listEscrows: (params?: {
+    limit?: number;
+    offset?: number;
+    status?: 'created' | 'released' | 'cancelled' | 'expired';
+  }) => api.get('/escrows', { params }),
+};
