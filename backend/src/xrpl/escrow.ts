@@ -2,7 +2,7 @@ import { EscrowCreate, EscrowFinish, EscrowCancel, isoTimeToRippleTime, xrpToDro
 import { createHash, randomBytes } from 'crypto';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
-import { Currency, formatCurrencyAmount } from './config';
+import { Currency } from './config';
 
 export interface EscrowParams {
   fromAddress: string;

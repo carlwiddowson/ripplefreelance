@@ -1,7 +1,7 @@
-import { Payment, xrpToDrops, dropsToXrp as _dropsToXrp } from 'xrpl';
+import { Payment, xrpToDrops } from 'xrpl';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
-import { Currency, formatCurrencyAmount, getRLUSDIssuer } from './config';
+import { Currency, getRLUSDIssuer } from './config';
 import { convertCurrency, getExchangeRate } from './amm';
 
 export interface PaymentParams {

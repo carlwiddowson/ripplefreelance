@@ -6,13 +6,11 @@
  */
 
 import { ReputationModel } from '../models/Reputation';
-import { UserModel } from '../models/User';
 import { repTokenService, BadgeTier, REPTOKEN_ECONOMICS } from '../xrpl/reptoken';
 import { logger } from '../utils/logger';
 
 export interface StakeParams {
   userId: string;
-  walletAddress: string;
   amount: number;
   tier: BadgeTier;
 }
@@ -27,7 +25,7 @@ export class StakingService {
    * Stake RepTokens for a badge
    */
   async stake(params: StakeParams): Promise<any> {
-    const { userId, walletAddress, amount, tier } = params;
+    const { userId, amount, tier } = params;
 
     try {
       // Validate tier

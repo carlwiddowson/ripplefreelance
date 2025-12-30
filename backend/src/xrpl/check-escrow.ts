@@ -7,10 +7,10 @@
  */
 
 import { CheckCreate, CheckCash, CheckCancel } from 'xrpl';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
-import { Currency, formatCurrencyAmount, getRLUSDIssuer } from './config';
+import { Currency, formatCurrencyAmount } from './config';
 
 export interface CheckEscrowParams {
   fromAddress: string;

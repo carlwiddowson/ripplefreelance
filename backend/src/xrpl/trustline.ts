@@ -6,7 +6,7 @@
 
 import { Client, TrustSet } from 'xrpl';
 import { logger } from '../utils/logger';
-import { Currency, getRLUSDIssuer, getCurrencyConfig } from './config';
+import { Currency, getCurrencyConfig } from './config';
 
 export interface TrustlineInfo {
   hasTrustline: boolean;

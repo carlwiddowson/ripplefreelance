@@ -270,7 +270,7 @@ export class RepTokenService {
    * Calculate lock period end date
    */
   calculateUnlockDate(tier: BadgeTier): Date {
-    const days = REPTOKEN_ECONOMICS.LOCK_PERIODS[tier];
+    const days = tier !== BadgeTier.NONE ? REPTOKEN_ECONOMICS.LOCK_PERIODS[tier as keyof typeof REPTOKEN_ECONOMICS.LOCK_PERIODS] : 0;
     const unlockDate = new Date();
     unlockDate.setDate(unlockDate.getDate() + days);
     return unlockDate;
@@ -280,7 +280,8 @@ export class RepTokenService {
    * Check if user can stake for a specific tier
    */
   canStakeForTier(balance: number, tier: BadgeTier): boolean {
-    const required = REPTOKEN_ECONOMICS.STAKING_TIERS[tier];
+    if (tier === BadgeTier.NONE) return false;
+    const required = REPTOKEN_ECONOMICS.STAKING_TIERS[tier as keyof typeof REPTOKEN_ECONOMICS.STAKING_TIERS];
     return balance >= required;
   }
 
@@ -316,14 +317,16 @@ export class RepTokenService {
    * Get required token amount for badge tier
    */
   getRequiredTokensForTier(tier: BadgeTier): number {
-    return REPTOKEN_ECONOMICS.STAKING_TIERS[tier] || 0;
+    if (tier === BadgeTier.NONE) return 0;
+    return REPTOKEN_ECONOMICS.STAKING_TIERS[tier as keyof typeof REPTOKEN_ECONOMICS.STAKING_TIERS] || 0;
   }
 
   /**
    * Get lock period for badge tier (in days)
    */
   getLockPeriodForTier(tier: BadgeTier): number {
-    return REPTOKEN_ECONOMICS.LOCK_PERIODS[tier] || 0;
+    if (tier === BadgeTier.NONE) return 0;
+    return REPTOKEN_ECONOMICS.LOCK_PERIODS[tier as keyof typeof REPTOKEN_ECONOMICS.LOCK_PERIODS] || 0;
   }
 }
 

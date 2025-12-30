@@ -6,7 +6,7 @@
 
 import { Client } from 'xrpl';
 import { logger } from '../utils/logger';
-import { Currency, getCurrencyConfig, formatCurrencyAmount } from './config';
+import { Currency, getCurrencyConfig } from './config';
 
 export interface AMMInfo {
   account: string;
@@ -63,10 +63,13 @@ export async function getAMMInfo(
 
     const ammData = response.result.amm;
 
+    const asset1Value = typeof ammData.amount === 'string' ? { currency: 'XRP' } : ammData.amount;
+    const asset2Value = typeof ammData.amount2 === 'string' ? { currency: 'XRP' } : ammData.amount2;
+
     return {
       account: ammData.account,
-      asset1: ammData.amount,
-      asset2: ammData.amount2,
+      asset1: asset1Value,
+      asset2: asset2Value,
       amount1: typeof ammData.amount === 'string' ? ammData.amount : ammData.amount.value,
       amount2: typeof ammData.amount2 === 'string' ? ammData.amount2 : ammData.amount2.value,
       lpTokenBalance: ammData.lp_token.value,

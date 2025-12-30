@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate } from '../middleware/auth';
 import { ReputationModel } from '../models/Reputation';
 import { stakingService } from '../services/StakingService';
-import { repTokenService, BadgeTier } from '../xrpl/reptoken';
+import { BadgeTier } from '../xrpl/reptoken';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -35,13 +35,14 @@ router.get('/balance', authenticate, async (req: Request, res: Response) => {
  * GET /api/v1/reputation/score
  * Get reputation score for authenticated user
  */
-router.get('/score', authenticate, async (req: Request, res: Response) => {
+router.get('/score', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
     const score = await ReputationModel.getReputationScore(userId);
 
     if (!score) {
-      return res.status(404).json({ error: 'Reputation score not found' });
+      res.status(404).json({ error: 'Reputation score not found' });
+      return;
     }
 
     res.json({
@@ -100,8 +101,8 @@ router.get('/leaderboard', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      leaderboard: leaderboard.map(entry => ({
-        rank: entry.rank,
+      leaderboard: leaderboard.map((entry: any) => ({
+        rank: entry.rank || 0,
         wallet_address: entry.wallet_address,
         reputation_score: Math.round(parseFloat(entry.reputation_score.toString())),
         gigs_completed: entry.gigs_completed,
@@ -170,7 +171,7 @@ router.get('/staking/summary', authenticate, async (req: Request, res: Response)
  * GET /api/v1/reputation/staking/tiers
  * Get staking tiers information
  */
-router.get('/staking/tiers', async (req: Request, res: Response) => {
+router.get('/staking/tiers', async (_req: Request, res: Response) => {
   try {
     const tiers = stakingService.getStakingTiers();
     res.json({
@@ -187,23 +188,23 @@ router.get('/staking/tiers', async (req: Request, res: Response) => {
  * POST /api/v1/reputation/staking/stake
  * Stake RepTokens for a badge
  */
-router.post('/staking/stake', authenticate, async (req: Request, res: Response) => {
+router.post('/staking/stake', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
-    const walletAddress = (req as any).user.wallet_address;
     const { amount, tier } = req.body;
 
     if (!amount || !tier) {
-      return res.status(400).json({ error: 'Amount and tier are required' });
+      res.status(400).json({ error: 'Amount and tier are required' });
+      return;
     }
 
     if (!Object.values(BadgeTier).includes(tier)) {
-      return res.status(400).json({ error: 'Invalid tier' });
+      res.status(400).json({ error: 'Invalid tier' });
+      return;
     }
 
     const result = await stakingService.stake({
       userId,
-      walletAddress,
       amount: parseFloat(amount),
       tier,
     });
@@ -231,13 +232,14 @@ router.post('/staking/stake', authenticate, async (req: Request, res: Response) 
  * POST /api/v1/reputation/staking/unstake
  * Unstake RepTokens after lock period
  */
-router.post('/staking/unstake', authenticate, async (req: Request, res: Response) => {
+router.post('/staking/unstake', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
     const { position_id } = req.body;
 
     if (!position_id) {
-      return res.status(400).json({ error: 'Position ID is required' });
+      res.status(400).json({ error: 'Position ID is required' });
+      return;
     }
 
     const result = await stakingService.unstake({
