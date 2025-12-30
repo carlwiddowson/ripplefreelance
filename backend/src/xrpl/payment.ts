@@ -1,33 +1,36 @@
 import { Payment, xrpToDrops, dropsToXrp as _dropsToXrp } from 'xrpl';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
+import { Currency, formatCurrencyAmount, getRLUSDIssuer } from './config';
+import { convertCurrency, getExchangeRate } from './amm';
 
 export interface PaymentParams {
   fromAddress: string;
   toAddress: string;
   amount: number; // In XRP or RLUSD
-  currency?: 'XRP' | 'RLUSD';
+  currency: Currency;
   destinationTag?: number;
   memo?: string;
 }
 
-export interface RLUSDPaymentParams extends PaymentParams {
-  currency: 'RLUSD';
-  issuerAddress: string; // RLUSD issuer address
-}
-
 export class PaymentService {
   /**
-   * Create a payment transaction for XRP
+   * Create a payment transaction for any supported currency
    */
-  async createXRPPayment(params: PaymentParams): Promise<Payment> {
-    const { fromAddress, toAddress, amount, destinationTag, memo } = params;
+  async createPayment(params: PaymentParams): Promise<Payment> {
+    const { fromAddress, toAddress, amount, currency, destinationTag, memo } = params;
 
     const payment: Payment = {
       TransactionType: 'Payment',
       Account: fromAddress,
       Destination: toAddress,
-      Amount: xrpToDrops(amount),
+      Amount: currency === Currency.XRP 
+        ? xrpToDrops(amount)
+        : {
+            currency: 'RLUSD',
+            value: amount.toString(),
+            issuer: getRLUSDIssuer(),
+          },
     };
 
     if (destinationTag) {
@@ -49,38 +52,17 @@ export class PaymentService {
   }
 
   /**
-   * Create a payment transaction for RLUSD stablecoin
+   * Create a payment transaction for XRP (backward compatibility)
    */
-  async createRLUSDPayment(params: RLUSDPaymentParams): Promise<Payment> {
-    const { fromAddress, toAddress, amount, issuerAddress, destinationTag, memo } = params;
+  async createXRPPayment(params: Omit<PaymentParams, 'currency'>): Promise<Payment> {
+    return this.createPayment({ ...params, currency: Currency.XRP });
+  }
 
-    const payment: Payment = {
-      TransactionType: 'Payment',
-      Account: fromAddress,
-      Destination: toAddress,
-      Amount: {
-        currency: 'RLUSD',
-        value: amount.toString(),
-        issuer: issuerAddress,
-      },
-    };
-
-    if (destinationTag) {
-      payment.DestinationTag = destinationTag;
-    }
-
-    if (memo) {
-      payment.Memos = [
-        {
-          Memo: {
-            MemoData: Buffer.from(memo, 'utf8').toString('hex').toUpperCase(),
-            MemoType: Buffer.from('payment', 'utf8').toString('hex').toUpperCase(),
-          },
-        },
-      ];
-    }
-
-    return payment;
+  /**
+   * Create a payment transaction for RLUSD
+   */
+  async createRLUSDPayment(params: Omit<PaymentParams, 'currency'>): Promise<Payment> {
+    return this.createPayment({ ...params, currency: Currency.RLUSD });
   }
 
   /**
@@ -136,21 +118,53 @@ export class PaymentService {
   }
 
   /**
+   * Convert between currencies using AMM rates
+   */
+  async convertCurrencyAmount(
+    amount: number,
+    fromCurrency: Currency,
+    toCurrency: Currency
+  ): Promise<number> {
+    const client = getXRPLClient().getClient();
+    return convertCurrency(client, amount, fromCurrency, toCurrency);
+  }
+
+  /**
+   * Get current exchange rate between currencies
+   */
+  async getRate(fromCurrency: Currency, toCurrency: Currency): Promise<number> {
+    const client = getXRPLClient().getClient();
+    const rate = await getExchangeRate(client, fromCurrency, toCurrency);
+    return rate?.rate ?? 0;
+  }
+
+  /**
    * Convert USD to XRP using current exchange rate
-   * Note: In production, use a real exchange rate API
+   * Note: In production, use a real exchange rate API or RLUSD as proxy
    */
   async convertUSDtoXRP(usdAmount: number): Promise<number> {
-    // Mock exchange rate - in production, fetch from API (e.g., CoinGecko, CryptoCompare)
-    const MOCK_XRP_PRICE_USD = 0.50; // $0.50 per XRP
-    return usdAmount / MOCK_XRP_PRICE_USD;
+    // If RLUSD AMM pool exists, use it (RLUSD ≈ 1 USD)
+    try {
+      const client = getXRPLClient().getClient();
+      return await convertCurrency(client, usdAmount, Currency.RLUSD, Currency.XRP);
+    } catch (error) {
+      // Fallback to mock rate if AMM not available
+      const MOCK_XRP_PRICE_USD = 0.50; // $0.50 per XRP
+      return usdAmount / MOCK_XRP_PRICE_USD;
+    }
   }
 
   /**
    * Convert XRP to USD using current exchange rate
    */
   async convertXRPtoUSD(xrpAmount: number): Promise<number> {
-    const MOCK_XRP_PRICE_USD = 0.50;
-    return xrpAmount * MOCK_XRP_PRICE_USD;
+    try {
+      const client = getXRPLClient().getClient();
+      return await convertCurrency(client, xrpAmount, Currency.XRP, Currency.RLUSD);
+    } catch (error) {
+      const MOCK_XRP_PRICE_USD = 0.50;
+      return xrpAmount * MOCK_XRP_PRICE_USD;
+    }
   }
 
   /**

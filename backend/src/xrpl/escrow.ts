@@ -2,11 +2,13 @@ import { EscrowCreate, EscrowFinish, EscrowCancel, isoTimeToRippleTime, xrpToDro
 import { createHash, randomBytes } from 'crypto';
 import { getXRPLClient } from './client';
 import { logger } from '../utils/logger';
+import { Currency, formatCurrencyAmount } from './config';
 
 export interface EscrowParams {
   fromAddress: string;
   toAddress: string;
-  amount: number; // In XRP
+  amount: number; // In XRP or RLUSD
+  currency?: Currency;
   finishAfter?: Date; // Earliest finish time
   cancelAfter?: Date; // Expiration time
   condition?: string; // For conditional escrows
@@ -39,12 +41,18 @@ export class EscrowService {
 
   /**
    * Create an escrow transaction
+   * Note: XRPL native escrows only support XRP. For RLUSD, we use conditional payments.
    */
   async createEscrow(params: EscrowParams): Promise<EscrowCreate> {
-    const { fromAddress, toAddress, amount, finishAfter, cancelAfter, condition } = params;
+    const { fromAddress, toAddress, amount, currency = Currency.XRP, finishAfter, cancelAfter, condition } = params;
 
     if (!cancelAfter) {
       throw new Error('CancelAfter is required for escrow');
+    }
+
+    // XRPL native escrows only support XRP
+    if (currency !== Currency.XRP) {
+      throw new Error('Native XRPL escrows only support XRP. For RLUSD, use conditional payments or Checks.');
     }
 
     const escrow: EscrowCreate = {
@@ -73,9 +81,19 @@ export class EscrowService {
   async createMilestoneEscrow(
     clientAddress: string,
     freelancerAddress: string,
-    amountXRP: number,
+    amount: number,
     deliveryDate: Date,
+    currency: Currency = Currency.XRP,
   ): Promise<{ escrow: EscrowCreate; fulfillment: string }> {
+    // For RLUSD, we need to use an alternative approach (Checks or held payments)
+    if (currency !== Currency.XRP) {
+      throw new Error(
+        'Native XRPL escrows only support XRP. ' +
+        'For RLUSD milestone payments, use Check or conditional Payment. ' +
+        'Consider converting RLUSD to XRP via AMM for escrow, or implement Check-based escrow.'
+      );
+    }
+
     // Generate condition/fulfillment pair
     const { condition, fulfillment } = this.generateConditionFulfillment();
 
@@ -88,13 +106,14 @@ export class EscrowService {
     const escrow = await this.createEscrow({
       fromAddress: clientAddress,
       toAddress: freelancerAddress,
-      amount: amountXRP,
+      amount,
+      currency,
       finishAfter,
       cancelAfter,
       condition,
     });
 
-    logger.info(`Created milestone escrow: ${clientAddress} -> ${freelancerAddress}, ${amountXRP} XRP`);
+    logger.info(`Created milestone escrow: ${clientAddress} -> ${freelancerAddress}, ${amount} ${currency}`);
 
     return { escrow, fulfillment };
   }

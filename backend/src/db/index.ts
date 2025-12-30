@@ -104,7 +104,10 @@ export interface Gig {
   description: string;
   category: string;
   skills: string[];
-  price_usd: number;
+  price_usd: number; // Legacy field, kept for backward compatibility
+  price_xrp?: number;
+  price_rlusd?: number;
+  currency: 'XRP' | 'RLUSD' | 'BOTH';
   estimated_delivery_days: number;
   milestones: any[];
   status: 'open' | 'in_progress' | 'completed' | 'cancelled';
@@ -119,6 +122,7 @@ export interface Transaction {
   to_wallet: string;
   amount_xrp?: number;
   amount_rlusd?: number;
+  currency: 'XRP' | 'RLUSD';
   tx_type: 'payment' | 'escrow_create' | 'escrow_finish' | 'escrow_cancel';
   gig_id?: string;
   status: 'pending' | 'confirmed' | 'failed';
@@ -133,7 +137,9 @@ export interface Escrow {
   gig_id: string;
   client_wallet: string;
   freelancer_wallet: string;
-  amount_xrp: number;
+  amount_xrp?: number;
+  amount_rlusd?: number;
+  currency: 'XRP' | 'RLUSD';
   condition_hash: string;
   fulfillment_hash: string;
   finish_after?: Date;

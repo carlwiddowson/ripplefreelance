@@ -12,12 +12,16 @@ export class GigModel {
     category: string;
     skills?: string[];
     price_usd: number;
+    price_xrp?: number;
+    price_rlusd?: number;
+    currency?: 'XRP' | 'RLUSD' | 'BOTH';
     estimated_delivery_days: number;
     milestones?: any[];
   }): Promise<Gig> {
+    const currency = data.currency || 'XRP';
     const result = await query<Gig>(
-      `INSERT INTO gigs (freelancer_id, title, description, category, skills, price_usd, estimated_delivery_days, milestones)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO gigs (freelancer_id, title, description, category, skills, price_usd, price_xrp, price_rlusd, currency, estimated_delivery_days, milestones)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         data.freelancer_id,
@@ -26,6 +30,9 @@ export class GigModel {
         data.category,
         JSON.stringify(data.skills || []),
         data.price_usd,
+        data.price_xrp || null,
+        data.price_rlusd || null,
+        currency,
         data.estimated_delivery_days,
         JSON.stringify(data.milestones || []),
       ]
@@ -50,7 +57,7 @@ export class GigModel {
   static async update(
     id: string,
     freelancer_id: string,
-    data: Partial<Pick<Gig, 'title' | 'description' | 'category' | 'skills' | 'price_usd' | 'estimated_delivery_days' | 'milestones' | 'status'>>
+    data: Partial<Pick<Gig, 'title' | 'description' | 'category' | 'skills' | 'price_usd' | 'price_xrp' | 'price_rlusd' | 'currency' | 'estimated_delivery_days' | 'milestones' | 'status'>>
   ): Promise<Gig | null> {
     const updates: string[] = [];
     const values: any[] = [];
@@ -75,6 +82,18 @@ export class GigModel {
     if (data.price_usd !== undefined) {
       updates.push(`price_usd = $${paramCount++}`);
       values.push(data.price_usd);
+    }
+    if (data.price_xrp !== undefined) {
+      updates.push(`price_xrp = $${paramCount++}`);
+      values.push(data.price_xrp);
+    }
+    if (data.price_rlusd !== undefined) {
+      updates.push(`price_rlusd = $${paramCount++}`);
+      values.push(data.price_rlusd);
+    }
+    if (data.currency !== undefined) {
+      updates.push(`currency = $${paramCount++}`);
+      values.push(data.currency);
     }
     if (data.estimated_delivery_days !== undefined) {
       updates.push(`estimated_delivery_days = $${paramCount++}`);
